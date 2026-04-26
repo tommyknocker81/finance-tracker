@@ -78,58 +78,78 @@ export default function Forecast({ projects, onEdit, isMobile }) {
             const rH = (m.raw      / maxVal) * BAR_HEIGHT;
             const wH = (m.weighted / maxVal) * BAR_HEIGHT;
 
+            const showTooltip = (type) => m.invs.length > 0 && setTooltip({ label: m.label, type });
+
+            const Tooltip = ({ type, align }) => {
+              const isWeighted = type === 'weighted';
+              const label = isWeighted ? 'Weighted' : 'Total value';
+              const total = isWeighted ? m.weighted : m.raw;
+              return (
+                <div style={{
+                  position: 'absolute', bottom: '100%',
+                  left: align === 'left' ? '0%' : 'auto',
+                  right: align === 'right' ? '0%' : 'auto',
+                  marginBottom: 8, background: 'oklch(16% 0.01 250)', color: 'white',
+                  borderRadius: 8, padding: '8px 12px', zIndex: 100,
+                  boxShadow: '0 4px 16px oklch(0% 0 0 / 20%)',
+                  whiteSpace: 'nowrap', pointerEvents: 'none', minWidth: 150,
+                }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: isWeighted ? 'var(--accent)' : 'oklch(78% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>
+                    {label}
+                  </div>
+                  {m.invs.map(inv => (
+                    <div key={inv.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 11, padding: '2px 0' }}>
+                      <span style={{ color: 'oklch(78% 0.01 250)', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{inv.project.name}</span>
+                      <span style={{ fontWeight: 700 }}>{fmt(isWeighted ? inv.amount * inv.project.probability / 100 : inv.amount)}</span>
+                    </div>
+                  ))}
+                  {m.invs.length > 1 && (
+                    <div style={{ borderTop: '1px solid oklch(30% 0.01 250)', marginTop: 5, paddingTop: 5, display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                      <span style={{ color: 'oklch(78% 0.01 250)' }}>Total</span>
+                      <span style={{ fontWeight: 700 }}>{fmt(total)}</span>
+                    </div>
+                  )}
+                  <div style={{
+                    position: 'absolute', top: '100%',
+                    left: align === 'left' ? 20 : 'auto', right: align === 'right' ? 20 : 'auto',
+                    width: 0, height: 0,
+                    borderLeft: '5px solid transparent', borderRight: '5px solid transparent',
+                    borderTop: '5px solid oklch(16% 0.01 250)',
+                  }} />
+                </div>
+              );
+            };
+
             return (
               <div
                 key={m.label}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
-                onMouseEnter={() => m.invs.length > 0 && setTooltip(m)}
-                onMouseLeave={() => setTooltip(null)}
               >
-                {/* tooltip */}
-                {tooltip?.label === m.label && (
-                  <div style={{
-                    position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
-                    marginBottom: 8, background: 'oklch(16% 0.01 250)', color: 'white',
-                    borderRadius: 8, padding: '8px 12px', zIndex: 100,
-                    boxShadow: '0 4px 16px oklch(0% 0 0 / 20%)',
-                    whiteSpace: 'nowrap', pointerEvents: 'none',
-                    minWidth: 140,
-                  }}>
-                    {m.invs.map(inv => (
-                      <div key={inv.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 11, padding: '2px 0' }}>
-                        <span style={{ color: 'oklch(78% 0.01 250)', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{inv.project.name}</span>
-                        <span style={{ fontWeight: 700 }}>{fmt(inv.amount)}</span>
-                      </div>
-                    ))}
-                    {m.invs.length > 1 && (
-                      <div style={{ borderTop: '1px solid oklch(30% 0.01 250)', marginTop: 5, paddingTop: 5, display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-                        <span style={{ color: 'oklch(78% 0.01 250)' }}>Total</span>
-                        <span style={{ fontWeight: 700 }}>{fmt(m.raw)}</span>
-                      </div>
-                    )}
-                    {/* arrow */}
-                    <div style={{
-                      position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
-                      width: 0, height: 0,
-                      borderLeft: '5px solid transparent', borderRight: '5px solid transparent',
-                      borderTop: '5px solid oklch(16% 0.01 250)',
-                    }} />
+                <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', height: BAR_HEIGHT, gap: 2, justifyContent: 'center', position: 'relative' }}>
+                  {/* Total bar */}
+                  <div
+                    style={{ width: '44%', height: rH || 0, position: 'relative',
+                      background: isPast ? 'oklch(93% 0.007 250)' : tooltip?.label === m.label && tooltip?.type === 'raw' ? 'oklch(80% 0.04 250)' : 'oklch(88% 0.04 250)',
+                      borderRadius: '3px 3px 0 0', transition: 'height 0.5s ease, background 0.15s',
+                      minHeight: m.raw > 0 ? 2 : 0, cursor: m.raw > 0 ? 'default' : 'default',
+                    }}
+                    onMouseEnter={() => showTooltip('raw')}
+                    onMouseLeave={() => setTooltip(null)}
+                  >
+                    {tooltip?.label === m.label && tooltip?.type === 'raw' && <Tooltip type="raw" align="left" />}
                   </div>
-                )}
-
-                <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', height: BAR_HEIGHT, gap: 2, justifyContent: 'center' }}>
-                  <div style={{
-                    width: '44%', height: rH || 0,
-                    background: isPast ? 'oklch(93% 0.007 250)' : 'oklch(88% 0.04 250)',
-                    borderRadius: '3px 3px 0 0', transition: 'height 0.5s ease',
-                    minHeight: m.raw > 0 ? 2 : 0,
-                  }} />
-                  <div style={{
-                    width: '44%', height: wH || 0,
-                    background: isPast ? 'oklch(74% 0.08 250)' : 'var(--accent)',
-                    borderRadius: '3px 3px 0 0', transition: 'height 0.5s ease',
-                    minHeight: m.weighted > 0 ? 2 : 0,
-                  }} />
+                  {/* Weighted bar */}
+                  <div
+                    style={{ width: '44%', height: wH || 0, position: 'relative',
+                      background: isPast ? 'oklch(74% 0.08 250)' : tooltip?.label === m.label && tooltip?.type === 'weighted' ? 'oklch(40% 0.18 250)' : 'var(--accent)',
+                      borderRadius: '3px 3px 0 0', transition: 'height 0.5s ease, background 0.15s',
+                      minHeight: m.weighted > 0 ? 2 : 0,
+                    }}
+                    onMouseEnter={() => showTooltip('weighted')}
+                    onMouseLeave={() => setTooltip(null)}
+                  >
+                    {tooltip?.label === m.label && tooltip?.type === 'weighted' && <Tooltip type="weighted" align="right" />}
+                  </div>
                 </div>
 
                 <div style={{ fontSize: 10, fontWeight: isCur ? 700 : 500, color: isCur ? 'var(--accent)' : isPast ? 'oklch(72% 0.01 250)' : 'oklch(48% 0.01 250)', marginTop: 6 }}>
