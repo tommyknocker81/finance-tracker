@@ -2,7 +2,7 @@ import Icon, { IC } from './Icon';
 import Pill from './Pill';
 import { fmt, YEAR } from '../data';
 
-export default function MonthModal({ month, onClose }) {
+export default function MonthModal({ month, onClose, onEdit }) {
   return (
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'oklch(16% 0.01 250 / 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
@@ -47,10 +47,14 @@ export default function MonthModal({ month, onClose }) {
           {month.invs.map((inv, idx) => (
             <div
               key={inv.id}
+              onClick={() => onEdit(inv.project)}
+              onMouseEnter={e => { e.currentTarget.style.background = 'oklch(98% 0.005 250)'; e.currentTarget.style.cursor = 'pointer'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
               style={{
                 display: 'grid', gridTemplateColumns: 'auto 1fr auto auto',
                 gap: 14, alignItems: 'center', padding: '14px 26px',
                 borderBottom: idx < month.invs.length - 1 ? '1px solid oklch(95% 0.005 250)' : 'none',
+                transition: 'background 0.1s',
               }}
             >
               <Pill status={inv.project.status} />

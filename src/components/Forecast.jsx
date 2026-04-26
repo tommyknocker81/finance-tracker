@@ -4,7 +4,7 @@ import MonthModal from './MonthModal';
 
 const BAR_HEIGHT = 200;
 
-export default function Forecast({ projects }) {
+export default function Forecast({ projects, onEdit }) {
   const [monthModal, setMonthModal] = useState(null);
 
   const active = projects.filter(p => p.status !== 'Lost');
@@ -143,7 +143,11 @@ export default function Forecast({ projects }) {
 
       {/* Month invoice modal */}
       {monthModal !== null && (
-        <MonthModal month={months[monthModal]} onClose={() => setMonthModal(null)} />
+        <MonthModal
+          month={months[monthModal]}
+          onClose={() => setMonthModal(null)}
+          onEdit={p => { setMonthModal(null); onEdit(p); }}
+        />
       )}
     </div>
   );

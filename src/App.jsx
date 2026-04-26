@@ -72,7 +72,7 @@ export default function App() {
           />
         )}
         {page === 'forecast' && (
-          <Forecast projects={projects} />
+          <Forecast projects={projects} onEdit={p => setEditing(p)} />
         )}
       </div>
 
