@@ -6,6 +6,7 @@ const BAR_HEIGHT = 200;
 
 export default function Forecast({ projects, onEdit }) {
   const [monthModal, setMonthModal] = useState(null);
+  const [tooltip, setTooltip]       = useState(null);
 
   const active = projects.filter(p => p.status !== 'Lost');
 
@@ -80,9 +81,43 @@ export default function Forecast({ projects, onEdit }) {
             const wH = (m.weighted / maxVal) * BAR_HEIGHT;
 
             return (
-              <div key={m.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {/* invisible spacer keeps label row aligned */}
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'transparent', marginBottom: 3 }}>·</div>
+              <div
+                key={m.label}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
+                onMouseEnter={() => m.invs.length > 0 && setTooltip(m)}
+                onMouseLeave={() => setTooltip(null)}
+              >
+                {/* tooltip */}
+                {tooltip?.label === m.label && (
+                  <div style={{
+                    position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
+                    marginBottom: 8, background: 'oklch(16% 0.01 250)', color: 'white',
+                    borderRadius: 8, padding: '8px 12px', zIndex: 100,
+                    boxShadow: '0 4px 16px oklch(0% 0 0 / 20%)',
+                    whiteSpace: 'nowrap', pointerEvents: 'none',
+                    minWidth: 140,
+                  }}>
+                    {m.invs.map(inv => (
+                      <div key={inv.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 11, padding: '2px 0' }}>
+                        <span style={{ color: 'oklch(78% 0.01 250)', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{inv.project.name}</span>
+                        <span style={{ fontWeight: 700 }}>{fmt(inv.amount)}</span>
+                      </div>
+                    ))}
+                    {m.invs.length > 1 && (
+                      <div style={{ borderTop: '1px solid oklch(30% 0.01 250)', marginTop: 5, paddingTop: 5, display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                        <span style={{ color: 'oklch(78% 0.01 250)' }}>Total</span>
+                        <span style={{ fontWeight: 700 }}>{fmt(m.raw)}</span>
+                      </div>
+                    )}
+                    {/* arrow */}
+                    <div style={{
+                      position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+                      width: 0, height: 0,
+                      borderLeft: '5px solid transparent', borderRight: '5px solid transparent',
+                      borderTop: '5px solid oklch(16% 0.01 250)',
+                    }} />
+                  </div>
+                )}
 
                 <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', height: BAR_HEIGHT, gap: 2, justifyContent: 'center' }}>
                   <div style={{
