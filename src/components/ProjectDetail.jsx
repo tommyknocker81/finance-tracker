@@ -1,8 +1,10 @@
 import Icon, { IC } from './Icon';
 import Pill from './Pill';
 import { fmt } from '../data';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function ProjectDetail({ project, onEdit, onDelete, onClose, onTogglePaid }) {
+  const isMobile = useIsMobile();
   const total    = project.invoices.reduce((s, i) => s + i.amount, 0);
   const paid     = project.invoices.filter(i => i.paid).reduce((s, i) => s + i.amount, 0);
   const weighted = total * project.probability / 100;
@@ -19,14 +21,21 @@ export default function ProjectDetail({ project, onEdit, onDelete, onClose, onTo
       />
 
       {/* Panel */}
-      <div style={{
+      <div style={isMobile ? {
+        position: 'absolute', left: 0, right: 0, bottom: 0,
+        maxHeight: '92vh', background: 'white',
+        borderRadius: '16px 16px 0 0',
+        boxShadow: '0 -4px 32px oklch(16% 0.01 250 / 0.1)',
+        display: 'flex', flexDirection: 'column',
+        animation: 'slideUp 0.22s ease',
+      } : {
         position: 'absolute', right: 0, top: 0, bottom: 0,
         width: 400, background: 'white',
         boxShadow: '-8px 0 32px oklch(16% 0.01 250 / 0.08)',
         display: 'flex', flexDirection: 'column',
         animation: 'slideIn 0.2s ease',
       }}>
-        <style>{`@keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}`}</style>
+        <style>{`@keyframes slideIn{from{transform:translateX(100%)}to{transform:none}} @keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}`}</style>
 
         {/* Header */}
         <div style={{ padding: '28px 28px 20px', borderBottom: '1px solid oklch(93% 0.006 250)' }}>

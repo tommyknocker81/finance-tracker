@@ -4,7 +4,7 @@ import MonthModal from './MonthModal';
 
 const BAR_HEIGHT = 200;
 
-export default function Forecast({ projects, onEdit }) {
+export default function Forecast({ projects, onEdit, isMobile }) {
   const [monthModal, setMonthModal] = useState(null);
   const [tooltip, setTooltip]       = useState(null);
 
@@ -34,34 +34,32 @@ export default function Forecast({ projects, onEdit }) {
   const totalR = months.reduce((s, m) => s + m.raw, 0);
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '40px 44px' }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px 16px' : '40px 44px' }}>
 
       {/* Title */}
-      <div style={{ marginBottom: 36 }}>
-        <p style={{ fontSize: 11, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
-          Revenue outlook · {YEAR}
-        </p>
-        <h1 style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1, color: 'oklch(12% 0.01 250)' }}>
+      <div style={{ marginBottom: isMobile ? 20 : 36 }}>
+        {!isMobile && <p style={{ fontSize: 11, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Revenue outlook · {YEAR}</p>}
+        <h1 style={{ fontSize: isMobile ? 28 : 44, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1, color: 'oklch(12% 0.01 250)' }}>
           Forecast
         </h1>
       </div>
 
       {/* Big stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,auto) 1fr', marginBottom: 36, paddingBottom: 32, borderBottom: '1px solid oklch(91% 0.007 250)' }}>
-        <div style={{ paddingRight: 40 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8, marginBottom: isMobile ? 20 : 36, paddingBottom: isMobile ? 20 : 32, borderBottom: '1px solid oklch(91% 0.007 250)' }}>
+        <div>
           <div style={{ fontSize: 10, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Weighted total</div>
-          <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--accent)', lineHeight: 1 }}>{fmt(totalW)}</div>
+          <div style={{ fontSize: isMobile ? 22 : 38, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--accent)', lineHeight: 1 }}>{fmt(totalW)}</div>
           <div style={{ fontSize: 11, color: 'oklch(62% 0.01 250)', marginTop: 4 }}>probability-adjusted</div>
         </div>
-        <div style={{ paddingRight: 40, borderLeft: '1px solid oklch(91% 0.007 250)', paddingLeft: 40 }}>
+        <div style={{ borderLeft: '1px solid oklch(91% 0.007 250)', paddingLeft: isMobile ? 16 : 40 }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Best case</div>
-          <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: '-0.03em', color: 'oklch(12% 0.01 250)', lineHeight: 1 }}>{fmt(totalR)}</div>
+          <div style={{ fontSize: isMobile ? 22 : 38, fontWeight: 800, letterSpacing: '-0.03em', color: 'oklch(12% 0.01 250)', lineHeight: 1 }}>{fmt(totalR)}</div>
           <div style={{ fontSize: 11, color: 'oklch(62% 0.01 250)', marginTop: 4 }}>all projects won</div>
         </div>
       </div>
 
       {/* Bar chart */}
-      <div style={{ marginBottom: 32 }}>
+      <div style={{ marginBottom: 32, overflowX: isMobile ? 'auto' : 'visible' }}>
         <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'oklch(55% 0.01 250)' }}>
             <span style={{ width: 8, height: 8, borderRadius: 2, background: 'oklch(88% 0.04 250)', display: 'inline-block' }} />
@@ -73,7 +71,7 @@ export default function Forecast({ projects, onEdit }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: BAR_HEIGHT + 28 }}>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: BAR_HEIGHT + 28, minWidth: isMobile ? 600 : 'auto' }}>
           {months.map(m => {
             const isPast = m.idx < NOW.getMonth();
             const isCur  = m.idx === NOW.getMonth();

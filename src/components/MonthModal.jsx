@@ -1,16 +1,18 @@
 import Icon, { IC } from './Icon';
 import Pill from './Pill';
 import { fmt, YEAR } from '../data';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function MonthModal({ month, onClose, onEdit }) {
+  const isMobile = useIsMobile();
   return (
     <div
-      style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'oklch(16% 0.01 250 / 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'oklch(16% 0.01 250 / 0.3)', display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center', padding: isMobile ? 0 : 24 }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div style={{
-        background: 'white', borderRadius: 14, width: '100%', maxWidth: 560,
-        maxHeight: '80vh', display: 'flex', flexDirection: 'column',
+        background: 'white', borderRadius: isMobile ? '16px 16px 0 0' : 14, width: '100%', maxWidth: isMobile ? '100%' : 560,
+        maxHeight: isMobile ? '90vh' : '80vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 64px oklch(16% 0.01 250 / 0.14)',
         animation: 'fadeUp 0.18s ease',
       }}>

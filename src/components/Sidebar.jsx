@@ -7,7 +7,43 @@ const NAV = [
   { id: 'forecast', label: 'Forecast', icon: IC.forecast  },
 ];
 
-export default function Sidebar({ page, setPage, projects }) {
+export default function Sidebar({ page, setPage, projects, isMobile }) {
+  if (isMobile) {
+    return (
+      <nav style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 800,
+        background: 'white', borderTop: '1px solid oklch(92% 0.007 250)',
+        display: 'flex', height: 60,
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}>
+        {NAV.map(n => (
+          <button
+            key={n.id}
+            onClick={() => setPage(n.id)}
+            style={{
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: page === n.id ? 'oklch(16% 0.01 250)' : 'oklch(58% 0.01 250)',
+            }}
+          >
+            <Icon d={n.icon} size={20} sw={1.5} stroke={page === n.id ? 'oklch(16% 0.01 250)' : 'oklch(58% 0.01 250)'} />
+            <span style={{ fontSize: 10, fontWeight: page === n.id ? 700 : 500 }}>{n.label}</span>
+          </button>
+        ))}
+        <button
+          onClick={() => supabase.auth.signOut()}
+          style={{
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+            background: 'none', border: 'none', cursor: 'pointer', color: 'oklch(58% 0.01 250)',
+          }}
+        >
+          <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" size={20} sw={1.5} stroke="oklch(58% 0.01 250)" />
+          <span style={{ fontSize: 10, fontWeight: 500 }}>Sign out</span>
+        </button>
+      </nav>
+    );
+  }
+
   return (
     <nav style={{
       width: 200, flexShrink: 0,

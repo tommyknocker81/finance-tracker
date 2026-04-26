@@ -6,6 +6,7 @@ import ProjectDetail from './components/ProjectDetail';
 import ProjectModal from './components/ProjectModal';
 import Login from './components/Login';
 import { useProjects } from './hooks/useProjects';
+import { useIsMobile } from './hooks/useIsMobile';
 import { supabase } from './supabase';
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [editing, setEditing]   = useState(null);
   const [session, setSession]   = useState(undefined);
+  const isMobile = useIsMobile();
   const { projects, loading, save, del, togglePaid } = useProjects();
 
   useEffect(() => {
@@ -60,19 +62,20 @@ export default function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%' }}>
-      <Sidebar page={page} setPage={setPage} projects={projects} />
+    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: '100%' }}>
+      <Sidebar page={page} setPage={setPage} projects={projects} isMobile={isMobile} />
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', paddingBottom: isMobile ? 60 : 0 }}>
         {page === 'pipeline' && (
           <Pipeline
             projects={projects}
             onSelect={setSelected}
             onNew={() => setEditing('new')}
+            isMobile={isMobile}
           />
         )}
         {page === 'forecast' && (
-          <Forecast projects={projects} onEdit={p => setEditing(p)} />
+          <Forecast projects={projects} onEdit={p => setEditing(p)} isMobile={isMobile} />
         )}
       </div>
 

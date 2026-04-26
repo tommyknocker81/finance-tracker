@@ -65,7 +65,7 @@ function ProjectRow({ p, onClick }) {
   );
 }
 
-export default function Pipeline({ projects, onSelect, onNew }) {
+export default function Pipeline({ projects, onSelect, onNew, isMobile }) {
   const [filter, setFilter] = useState('All');
 
   const active   = projects.filter(p => p.status !== 'Lost');
@@ -75,58 +75,57 @@ export default function Pipeline({ projects, onSelect, onNew }) {
   const totalWeighted = active.reduce((s, p) => s + p.invoices.reduce((a, i) => a + i.amount, 0) * p.probability / 100, 0);
   const totalWon      = projects.filter(p => p.status === 'Won').reduce((s, p) => s + p.invoices.reduce((a, i) => a + i.amount, 0), 0);
 
+  const pad = isMobile ? '20px 16px' : '40px 44px';
+
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '40px 44px' }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: pad }}>
       {/* Title row */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 36 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isMobile ? 20 : 36 }}>
         <div>
-          <p style={{ fontSize: 11, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
-            Sales · {YEAR}
-          </p>
-          <h1 style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1, color: 'oklch(12% 0.01 250)' }}>
+          {!isMobile && <p style={{ fontSize: 11, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Sales · {YEAR}</p>}
+          <h1 style={{ fontSize: isMobile ? 28 : 44, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1, color: 'oklch(12% 0.01 250)' }}>
             Pipeline
           </h1>
         </div>
         <button
           onClick={onNew}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           style={{
             display: 'flex', alignItems: 'center', gap: 6,
-            padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+            padding: isMobile ? '9px 14px' : '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
             background: 'oklch(16% 0.01 250)', color: 'white',
-            border: 'none', cursor: 'pointer', transition: 'opacity 0.15s',
+            border: 'none', cursor: 'pointer',
           }}
         >
           <Icon d={IC.plus} size={14} sw={2.5} stroke="white" />
-          New project
+          {!isMobile && 'New project'}
         </button>
       </div>
 
       {/* Big stats */}
       <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(3,1fr)',
-        marginBottom: 36, paddingBottom: 32,
+        display: 'grid', gridTemplateColumns: isMobile ? 'repeat(3,1fr)' : 'repeat(3,1fr)',
+        marginBottom: isMobile ? 20 : 36, paddingBottom: isMobile ? 20 : 32,
         borderBottom: '1px solid oklch(91% 0.007 250)',
+        gap: isMobile ? 8 : 0,
       }}>
         {[
-          { label: 'Pipeline value',    val: fmt(totalPipeline), sub: 'excl. lost' },
-          { label: 'Weighted forecast', val: fmt(totalWeighted), sub: 'by probability', accent: true },
-          { label: 'Won this year',     val: fmt(totalWon),      sub: 'confirmed',      green: true  },
+          { label: 'Pipeline',  val: fmt(totalPipeline), sub: 'excl. lost' },
+          { label: 'Weighted',  val: fmt(totalWeighted), sub: 'by prob.', accent: true },
+          { label: 'Won',       val: fmt(totalWon),      sub: 'confirmed', green: true  },
         ].map(s => (
-          <div key={s.label} style={{ paddingRight: 24 }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{s.label}</div>
+          <div key={s.label} style={{ paddingRight: isMobile ? 0 : 24 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{s.label}</div>
             <div style={{
-              fontSize: 30, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1,
+              fontSize: isMobile ? 18 : 30, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1,
               color: s.accent ? 'var(--accent)' : s.green ? 'oklch(36% 0.12 145)' : 'oklch(12% 0.01 250)',
             }}>{s.val}</div>
-            <div style={{ fontSize: 11, color: 'oklch(62% 0.01 250)', marginTop: 4 }}>{s.sub}</div>
+            <div style={{ fontSize: 10, color: 'oklch(62% 0.01 250)', marginTop: 3 }}>{s.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Status filters */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 16, flexWrap: 'wrap' }}>
         {['All', ...STATUSES].map(f => {
           const count  = f === 'All' ? projects.length : projects.filter(p => p.status === f).length;
           const active = f === filter;
@@ -148,18 +147,25 @@ export default function Pipeline({ projects, onSelect, onNew }) {
         })}
       </div>
 
-      {/* List header */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 120px 100px 80px 24px',
-        gap: 12, padding: '0 0 8px',
-        borderBottom: '1px solid oklch(90% 0.007 250)',
-      }}>
-        {['Project', 'Status', 'Value', 'Prob.', ''].map(h => (
-          <div key={h} style={{ fontSize: 10, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{h}</div>
-        ))}
-      </div>
-
-      {filtered.map(p => <ProjectRow key={p.id} p={p} onClick={() => onSelect(p)} />)}
+      {/* Project list / cards */}
+      {isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filtered.map(p => <ProjectCard key={p.id} p={p} onClick={() => onSelect(p)} />)}
+        </div>
+      ) : (
+        <>
+          <div style={{
+            display: 'grid', gridTemplateColumns: '1fr 120px 100px 80px 24px',
+            gap: 12, padding: '0 0 8px',
+            borderBottom: '1px solid oklch(90% 0.007 250)',
+          }}>
+            {['Project', 'Status', 'Value', 'Prob.', ''].map(h => (
+              <div key={h} style={{ fontSize: 10, fontWeight: 600, color: 'oklch(58% 0.01 250)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{h}</div>
+            ))}
+          </div>
+          {filtered.map(p => <ProjectRow key={p.id} p={p} onClick={() => onSelect(p)} />)}
+        </>
+      )}
 
       {filtered.length === 0 && (
         <div style={{ padding: '60px 0', textAlign: 'center', color: 'oklch(65% 0.01 250)', fontSize: 13 }}>

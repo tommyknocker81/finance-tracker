@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Icon, { IC } from './Icon';
 import { STATUS_CONFIG, STATUSES, uid, fmt } from '../data';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const INP = {
   width: '100%', padding: '8px 11px', borderRadius: 6,
@@ -12,6 +13,7 @@ const INP = {
 
 export default function ProjectModal({ project, onSave, onClose }) {
   const isNew = !project;
+  const isMobile = useIsMobile();
   const [form, setForm] = useState(project
     ? { ...project, invoices: project.invoices.map(i => ({ ...i })) }
     : {
@@ -37,7 +39,7 @@ export default function ProjectModal({ project, onSave, onClose }) {
       style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'oklch(16% 0.01 250 / 0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div style={{ background: 'white', borderRadius: 12, width: '100%', maxWidth: 540, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px oklch(16% 0.01 250 / 0.15)' }}>
+      <div style={{ background: 'white', borderRadius: isMobile ? '16px 16px 0 0' : 12, width: '100%', maxWidth: isMobile ? '100%' : 540, maxHeight: isMobile ? '95vh' : '90vh', overflowY: 'auto', boxShadow: '0 20px 60px oklch(16% 0.01 250 / 0.15)', ...(isMobile && { position: 'fixed', bottom: 0, left: 0, right: 0, margin: 0 }) }}>
 
         {/* Header */}
         <div style={{ padding: '22px 26px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
