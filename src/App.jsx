@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Pipeline from './components/Pipeline';
 import Forecast from './components/Forecast';
 import ProjectDetail from './components/ProjectDetail';
 import ProjectModal from './components/ProjectModal';
+import Login from './components/Login';
 import { useProjects } from './hooks/useProjects';
+import { supabase } from './supabase';
 
 export default function App() {
   const [page, setPage]       = useState('pipeline');
   const [selected, setSelected] = useState(null);
   const [editing, setEditing]   = useState(null);
+  const [session, setSession]   = useState(undefined);
   const { projects, loading, save, del, togglePaid } = useProjects();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
+    return () => subscription.unsubscribe();
+  }, []);
 
   async function handleSave(p) {
     await save(p);
@@ -31,6 +40,16 @@ export default function App() {
         : prev
     );
   }
+
+  if (session === undefined) {
+    return (
+      <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ color: 'oklch(60% 0 0)', fontSize: 14 }}>Loading…</span>
+      </div>
+    );
+  }
+
+  if (!session) return <Login />;
 
   if (loading) {
     return (

@@ -1,5 +1,6 @@
 import Icon, { IC } from './Icon';
 import { STATUSES, statusDot } from '../data';
+import { supabase } from '../supabase';
 
 const NAV = [
   { id: 'pipeline', label: 'Pipeline', icon: IC.pipeline },
@@ -53,6 +54,20 @@ export default function Sidebar({ page, setPage, projects }) {
       ))}
 
       <div style={{ flex: 1 }} />
+
+      <button
+        onClick={() => supabase.auth.signOut()}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 9,
+          padding: '8px 10px', borderRadius: 7,
+          fontSize: 13, fontWeight: 500, marginBottom: 8,
+          background: 'transparent', color: 'oklch(52% 0.01 250)',
+          border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left',
+        }}
+      >
+        <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" size={15} sw={1.5} stroke="oklch(60% 0.01 250)" />
+        Sign out
+      </button>
 
       {/* Status counts */}
       <div style={{ padding: '12px 10px' }}>
