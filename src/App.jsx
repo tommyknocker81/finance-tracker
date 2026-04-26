@@ -9,19 +9,18 @@ import { useProjects } from './hooks/useProjects';
 import { useIsMobile } from './hooks/useIsMobile';
 import { supabase } from './supabase';
 
-export default function App() {
-  const [page, setPage]       = useState('pipeline');
+const Spinner = () => (
+  <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+    <span style={{ color: 'oklch(60% 0 0)', fontSize: 14 }}>Loading…</span>
+  </div>
+);
+
+function AuthenticatedApp() {
+  const [page, setPage]         = useState('pipeline');
   const [selected, setSelected] = useState(null);
   const [editing, setEditing]   = useState(null);
-  const [session, setSession]   = useState(undefined);
   const isMobile = useIsMobile();
   const { projects, loading, save, del, togglePaid } = useProjects();
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    return () => subscription.unsubscribe();
-  }, []);
 
   async function handleSave(p) {
     await save(p);
@@ -43,23 +42,7 @@ export default function App() {
     );
   }
 
-  if (session === undefined) {
-    return (
-      <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: 'oklch(60% 0 0)', fontSize: 14 }}>Loading…</span>
-      </div>
-    );
-  }
-
-  if (!session) return <Login />;
-
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: 'oklch(60% 0 0)', fontSize: 14 }}>Loading…</span>
-      </div>
-    );
-  }
+  if (loading) return <Spinner />;
 
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: '100%' }}>
@@ -98,4 +81,18 @@ export default function App() {
       )}
     </div>
   );
+}
+
+export default function App() {
+  const [session, setSession] = useState(undefined);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (session === undefined) return <Spinner />;
+  if (!session) return <Login />;
+  return <AuthenticatedApp />;
 }
