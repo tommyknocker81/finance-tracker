@@ -26,20 +26,23 @@ export function useProjects() {
   }
 
   async function save(p) {
-    await supabase.from('projects').upsert({
+    const { error: projErr } = await supabase.from('projects').upsert({
       id: p.id, name: p.name, status: p.status,
       probability: p.probability, client: p.client, notes: p.notes,
     });
+    if (projErr) { console.error('project save error:', projErr); return; }
 
     await supabase.from('invoices').delete().eq('project_id', p.id);
 
-    if (p.invoices.length > 0) {
-      await supabase.from('invoices').insert(
-        p.invoices.map(inv => ({
+    const validInvoices = p.invoices.filter(inv => inv.dueDate);
+    if (validInvoices.length > 0) {
+      const { error: invErr } = await supabase.from('invoices').insert(
+        validInvoices.map(inv => ({
           id: inv.id, project_id: p.id, name: inv.name,
           amount: inv.amount, due_date: inv.dueDate, paid: inv.paid,
         }))
       );
+      if (invErr) console.error('invoice save error:', invErr);
     }
 
     const { data } = await supabase
